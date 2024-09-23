@@ -7,12 +7,36 @@ use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\isEmpty;
+
 class TicketController extends Controller
 {
     public function index(){
-        $data = Ticket::all();
+        $count = Ticket::count();
+        $open = Ticket::where('keterangan', '1')->count();
+        $closed = Ticket::where('keterangan', '2')->count();
+        // $data = Ticket::all();
+        $data = Ticket::orderByRaw('keterangan = 1 DESC')->get();
 
-        return TicketResource::collection($data);
+
+        return response()->json([
+            'total' => $count,
+            'open' => $open,
+            'closed' => $closed,
+            'data' => TicketResource::collection($data)
+        ]);
+    }
+
+    public function ticketById($id){
+        $ticket = Ticket::where('id', $id)->first();
+
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Keluhan tidak ditemukan'
+            ], 404);
+        }
+
+        return new TicketResource($ticket);
     }
 
     public function store(Request $request){
@@ -31,11 +55,11 @@ class TicketController extends Controller
 
     public function update(Request $request, $id){
         $request->validate([
-            'nama_pelapor' => 'required|string|max:255',
-            'email_pelapor' => 'required|email|max:255',
-            'sektor' => 'required|string|max:255',
-            'keluhan' => 'required|string|max:255',
-            'keterangan' => 'required|string|max:255',
+            'nama_pelapor' => 'sometimes|required|string|max:255',
+            'email_pelapor' => 'sometimes|required|email|max:255',
+            'sektor' => 'sometimes|required|string|max:255',
+            'keluhan' => 'sometimes|required|string|max:255',
+            'keterangan' => 'sometimes|required|string|max:255',
         ]);
 
         // Temukan data keluhan berdasarkan id

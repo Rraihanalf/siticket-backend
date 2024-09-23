@@ -16,17 +16,31 @@ class UserController extends Controller
         return UserResource::collection($data);
     }
 
+    public function userById($id){
+        $user = User::where('id', $id)->first();
+
+        if(!$user){
+            return response()->json([
+                'message' => 'Pengguna tidak ditemukan'
+            ], 404);
+        }
+        
+        return new UserResource($user);
+    }
+
     public function store(Request $request){
         $validatedData = $request->validate([
             'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
-            'username' => 'required|string|max:50',
-            'password' => 'required'
+            'username' => 'required|string|max:50|unique:users,username',
+            'password' => 'required',
+            'level' => 'required'
         ]);
 
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         User::create($validatedData);
+
         return response()->json([
             'message' => 'Pengguna baru berhasil ditambahkan',
             'User' => $validatedData
@@ -38,7 +52,8 @@ class UserController extends Controller
             'name' => 'sometimes|required|string|max:50',
             'email' => 'sometimes|required|email',
             'username' => 'sometimes|required|string|max:50',
-            'password' => 'sometimes|required'
+            'password' => 'sometimes|required',
+            'level' => 'sometimes|required'
         ]);
 
         if(!empty($validatedData['password'])){

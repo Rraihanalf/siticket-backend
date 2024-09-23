@@ -27,12 +27,14 @@ class DatabaseSeeder extends Seeder
                 'email' => 'revan@gmail.com',
                 'username' => 'revan',
                 'password' => bcrypt('123456'),
+                'level' => '1'
             ],
             [
                 'name' => 'Ralie',
                 'email' => 'ralie@gmail.com',
                 'username' => 'ralie',
                 'password' => bcrypt('123456'),
+                'level' => '2'
             ],
         ];
 
